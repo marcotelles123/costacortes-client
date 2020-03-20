@@ -1,0 +1,12 @@
+.columnButton {
+    width: 10px;
+    cursor: pointer;
+}
+
+.highPressure{
+    background-color: #ff001177;
+}
+
+.deleteColumn{
+    cursor: pointer;
+}
