@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import api from "./../../service/api";
 import "./styles.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -13,6 +13,7 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import LightBox from "./../LightBoxImage/LightBoxImage";
+import FilterAutoComplete from "./../FilterAutoComplete/FilterAutoComplete";
 
 const useStyles = makeStyles({
   table: {
@@ -21,9 +22,16 @@ const useStyles = makeStyles({
 });
 
 function FormList() {
-  const [products, setProducts] = useState([]);
+  const productsState = useState([]);
+  const productsDBState = useState([]);
   const openImageState = useState(Boolean);
   const [imageBytes, setImageBytes] = useState();
+
+  const products = productsState[0];
+  const setProducts = productsState[1];
+
+  const productsDB = productsDBState[0];
+  const setProductsDB = productsDBState[1];
 
   const openImage = openImageState[0];
   const setOpenImage = openImageState[1];
@@ -31,6 +39,7 @@ function FormList() {
   async function loadProducts() {
     const response = await api.get("/product");
     setProducts(response.data);
+    setProductsDB(response.data);
   }
 
   useEffect(() => {
@@ -72,57 +81,70 @@ function FormList() {
 
   const classes = useStyles();
   var table = (
-    <TableContainer component={Paper}>
-      <Table className={classes.table} aria-label="simple table">
-        <TableHead>
-          <TableRow>
-            <TableCell style={{ fontWeight: "bold" }}>Nome</TableCell>
-            <TableCell style={{ fontWeight: "bold" }} align="right">
-              Preco
-            </TableCell>
-            <TableCell style={{ fontWeight: "bold" }} align="right">
-              Largura
-            </TableCell>
-            <TableCell style={{ fontWeight: "bold" }} align="right">
-              Altura
-            </TableCell>
-            <TableCell style={{ fontWeight: "bold" }} align="center">
-              Imagem
-            </TableCell>
-            <TableCell style={{ fontWeight: "bold" }}  align="center" >
-              Apagar
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {products.map(row => (
-            <TableRow key={row._id}>
-              <TableCell component="th" scope="row">
-                {row.name}
+    <Fragment>
+      <FilterAutoComplete products={products} setProducts={setProducts} productsDB={productsDB} />
+      <br /> <br /> <br />
+      <TableContainer component={Paper}>
+        <Table className={classes.table} aria-label="simple table">
+          <TableHead>
+            <TableRow>
+              <TableCell style={{ fontWeight: "bold" }}>Nome</TableCell>
+              <TableCell style={{ fontWeight: "bold" }} align="right">
+                Preco
               </TableCell>
-              <TableCell align="right">R$ {row.price}</TableCell>
-              <TableCell align="right">{row.width}</TableCell>
-              <TableCell align="right">{row.heigth}</TableCell>
-              <TableCell
-                style={{ padding: "5px" }}
-                align="center"
-                onClick={() => showImage(row.image)}
-              >
-                <img
-                  id="ItemPreview"
-                  style={{ maxHeight: "35px" }}
-                  src={row.image}
-                />
+              <TableCell style={{ fontWeight: "bold" }} align="right">
+                Largura
               </TableCell>
-              {openImage && <LightBox imageBytes={imageBytes} openImageState={openImageState} />}
-              <TableCell className="deleteColumn" align="center" onClick={() => deleteRow(row)}>
-                <FontAwesomeIcon icon={faTrashAlt} />
+              <TableCell style={{ fontWeight: "bold" }} align="right">
+                Altura
+              </TableCell>
+              <TableCell style={{ fontWeight: "bold" }} align="center">
+                Imagem
+              </TableCell>
+              <TableCell style={{ fontWeight: "bold" }} align="center">
+                Apagar
               </TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody>
+            {products.map(row => (
+              <TableRow key={row._id}>
+                <TableCell component="th" scope="row">
+                  {row.name}
+                </TableCell>
+                <TableCell align="right">R$ {row.price}</TableCell>
+                <TableCell align="right">{row.width}</TableCell>
+                <TableCell align="right">{row.heigth}</TableCell>
+                <TableCell
+                  style={{ padding: "5px" }}
+                  align="center"
+                  onClick={() => showImage(row.image)}
+                >
+                  <img
+                    id="ItemPreview"
+                    style={{ maxHeight: "35px" }}
+                    src={row.image}
+                  />
+                </TableCell>
+                {openImage && (
+                  <LightBox
+                    imageBytes={imageBytes}
+                    openImageState={openImageState}
+                  />
+                )}
+                <TableCell
+                  className="deleteColumn"
+                  align="center"
+                  onClick={() => deleteRow(row)}
+                >
+                  <FontAwesomeIcon icon={faTrashAlt} />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Fragment>
   );
   return (
     <div id="formList">
